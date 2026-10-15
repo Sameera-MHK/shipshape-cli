@@ -113,6 +113,63 @@ test('secret values from .env and .env.example are never printed', (t) => {
   }
 });
 
+test('.shipshapeignore patterns are listed in text and JSON output', () => {
+  const text = run(['check', fixture('ignore-project')]);
+  assert.equal(text.code, 1);
+  assert.match(text.stdout, /Ignoring \(\.shipshapeignore\): fixtures\/, \/legacy\/\*\.js, \*\*\/\*\.generated\.js/);
+  const json = JSON.parse(run(['check', fixture('ignore-project'), '--json']).stdout);
+  assert.deepEqual(json.ignorePatterns, ['fixtures/', '/legacy/*.js', '**/*.generated.js']);
+  assert.deepEqual(json.findings.map((f) => f.file), ['legacy/nested/keep.js', 'src/index.js']);
+  assert.deepEqual(JSON.parse(run(['check', fixture('valid-project'), '--json']).stdout).ignorePatterns, []);
+});
+
+test('a malformed .shipshapeignore exits 2 with the offending line', (t) => {
+  const root = tempCopy('valid-project', t);
+  write(root, '.shipshapeignore', '# ok\n[abc].js\n');
+  const { code, stdout, stderr } = run(['check', root]);
+  assert.equal(code, 2);
+  assert.equal(stdout, '');
+  assert.match(stderr, /^Error: \.shipshapeignore line 2: character classes/);
+});
+
+test('an unreadable .shipshapeignore exits 2', { skip: (process.platform === 'win32' || process.getuid?.() === 0) && 'requires non-root POSIX permissions' }, (t) => {
+  const root = tempCopy('valid-project', t);
+  write(root, '.shipshapeignore', 'dist/\n');
+  const file = `${root}/.shipshapeignore`;
+  fs.chmodSync(file, 0o000);
+  let result;
+  try {
+    result = run(['check', root]);
+  } finally {
+    fs.chmodSync(file, 0o644);
+  }
+  assert.equal(result.code, 2);
+  assert.match(result.stderr, /\.shipshapeignore could not be read \(EACCES\)/);
+});
+
+test('secrets stay hidden when an ignore file is present', (t) => {
+  const root = tempCopy('ignore-project', t);
+  write(root, '.env', 'API_KEY=fake-secret-TopSecretValue987\n');
+  write(root, 'src/config.js', 'export const k = process.env.API_KEY;\n');
+  write(root, '.env.example', 'API_KEY=placeholder-value-not-printed\n');
+  for (const args of [[], ['--json']]) {
+    const { stdout, stderr } = run(['check', root, ...args]);
+    assert.ok(!(stdout + stderr).includes('TopSecretValue987'));
+    assert.ok(!(stdout + stderr).includes('placeholder-value-not-printed'));
+  }
+});
+
+test("the repository's own .shipshapeignore hides fixtures but not real source problems", (t) => {
+  const root = tempCopy('valid-project', t);
+  fs.copyFileSync(new URL('../../.shipshapeignore', import.meta.url), `${root}/.shipshapeignore`);
+  write(root, 'test/fixtures/broken/index.js', 'import x from "./fixture-missing";');
+  write(root, 'examples/demo/index.js', 'import y from "./example-missing";');
+  write(root, 'src/real.js', 'import z from "./real-missing";');
+  const report = JSON.parse(run(['check', root, '--json']).stdout);
+  assert.deepEqual(report.findings.map((f) => [f.ruleId, f.file]), [['IMP001', 'src/real.js']]);
+  assert.equal(report.exitCode, 1);
+});
+
 test('invalid usage exits 2 with a message on stderr', () => {
   const cases = [
     [['check', '.', '--bogus']],

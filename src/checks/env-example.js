@@ -109,7 +109,7 @@ export function checkEnvExample(root, sourceFiles) {
   }
 
   if (firstUse.size === 0 && exampleText === null) {
-    return { skipped: 'no process.env or import.meta.env references found', findings };
+    return { skipped: 'no named process.env or import.meta.env references found', findings };
   }
 
   if (exampleText === null) {

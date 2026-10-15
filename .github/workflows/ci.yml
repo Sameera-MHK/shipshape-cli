@@ -20,5 +20,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: node bin/shipshape.js check .
       - run: node bin/shipshape.js check examples/clean-node-app
       - run: npm pack --dry-run

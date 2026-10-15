@@ -3,7 +3,7 @@ import path from 'node:path';
 import { walk, staticString, position } from '../ast.js';
 import { finding } from '../findings.js';
 
-const RESOLVE_EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.json'];
+const RESOLVE_EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.json', '.d.ts', '.d.mts', '.d.cts'];
 // TypeScript projects often import "./file.js" that exists on disk as "./file.ts".
 const TS_SOURCE_FOR = {
   '.js': ['.ts', '.tsx'],

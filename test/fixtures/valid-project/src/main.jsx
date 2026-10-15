@@ -5,6 +5,7 @@ import Button from './components/Button';
 import { add } from './utils/math.js';
 import config from './data/config.json';
 import template from './data/template.txt?raw';
+import './styles.css';
 export * from './utils';
 export { helper } from './utils/helper';
 

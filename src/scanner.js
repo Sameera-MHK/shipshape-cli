@@ -3,6 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { parse } from '@babel/parser';
 import { finding } from './findings.js';
+import { FatalError } from './errors.js';
+import { loadIgnore } from './ignore.js';
 import packageJsonCheck from './checks/package-json.js';
 import projectFilesCheck from './checks/project-files.js';
 import importsCheck from './checks/imports.js';
@@ -29,8 +31,7 @@ export const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.mjs', '.cjs', '.ts', 
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_FILES = 20000;
 
-/** Error that maps to exit code 2 (usage problem or fatal execution error). */
-export class FatalError extends Error {}
+export { FatalError };
 
 export function resolveTarget(input) {
   const root = path.resolve(input);
@@ -63,10 +64,10 @@ function toPosix(p) {
 }
 
 /**
- * Walk the project, skipping excluded directories and all symbolic links,
- * and return relative paths of candidate source files.
+ * Walk the project, skipping excluded directories, paths matched by .shipshapeignore
+ * and all symbolic links, and return absolute paths of candidate source files.
  */
-function collectSourceFiles(root, scanFindings) {
+function collectSourceFiles(root, ignore, scanFindings) {
   const files = [];
   const stack = [root];
   while (stack.length > 0) {
@@ -87,6 +88,7 @@ function collectSourceFiles(root, scanFindings) {
     for (const entry of entries) {
       if (entry.isSymbolicLink()) continue;
       const abs = path.join(dir, entry.name);
+      if (ignore.isIgnored(toPosix(path.relative(root, abs)), entry.isDirectory())) continue;
       if (entry.isDirectory()) {
         if (!EXCLUDED_DIRS.has(entry.name)) stack.push(abs);
       } else if (entry.isFile() && SOURCE_EXTENSIONS.has(path.extname(entry.name))) {
@@ -173,8 +175,9 @@ function loadSourceFile(root, abs, scanFindings) {
  */
 export function scan(targetInput) {
   const root = resolveTarget(targetInput);
+  const ignore = loadIgnore(root);
   const scanFindings = [];
-  const sourceFiles = collectSourceFiles(root, scanFindings)
+  const sourceFiles = collectSourceFiles(root, ignore, scanFindings)
     .map((abs) => loadSourceFile(root, abs, scanFindings))
     .filter(Boolean);
 
@@ -214,6 +217,7 @@ export function scan(targetInput) {
 
   return {
     root,
+    ignorePatterns: ignore.patterns,
     filesScanned: sourceFiles.length,
     checks,
     findings: checks.flatMap((c) => c.findings),

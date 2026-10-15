@@ -75,5 +75,5 @@ test('missing .env.example is reported once, listing variable names', () => {
 test('check is skipped, not passed, when there are no env references or example', () => {
   const env = scan(fixture('broken-imports')).checks.find((c) => c.id === 'env-example');
   assert.equal(env.status, 'skipped');
-  assert.match(env.reason, /no process\.env/);
+  assert.match(env.reason, /no named process\.env/);
 });

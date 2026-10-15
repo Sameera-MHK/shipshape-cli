@@ -15,3 +15,8 @@ Initial release.
 - Project hygiene checks for README, `.gitignore` and generated directories (HYG001-HYG003).
 - Scan safety: no symlink following, excluded generated directories, size and binary limits, refusal to scan the filesystem root or home directory.
 - Exit codes 0 (no errors), 1 (errors), 2 (usage or fatal error).
+- `.shipshapeignore` for explicitly excluding paths (such as intentionally broken fixtures) from a scan.
+
+### Fixed
+
+- Imports of TypeScript declaration files (`./types` resolving to `types.d.ts`) are no longer reported as broken.

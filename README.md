@@ -123,7 +123,7 @@ Symbols: `✗` error, `!` warning, `i` info, `✓` passed, `-` skipped.
 
 Files are parsed with [`@babel/parser`](https://babeljs.io/docs/babel-parser), not regular expressions. Supported forms: `import`, `export ... from`, `export * from`, `import()` and `require()` with static strings, TypeScript `import type` and `import x = require()`.
 
-Resolution tries the exact path, then the extensions `.js .jsx .mjs .cjs .ts .tsx .mts .cts .json`, then `index.*` inside a directory (or a directory containing its own `package.json`). A `.js` import that exists as `.ts`/`.tsx` (common in TypeScript ESM projects) is accepted. Query and hash suffixes such as `?raw` are ignored. Package imports (`react`, `node:fs`, `@scope/pkg`) are never reported.
+Resolution tries the exact path, then the extensions `.js .jsx .mjs .cjs .ts .tsx .mts .cts .json .d.ts .d.mts .d.cts`, then `index.*` inside a directory (or a directory containing its own `package.json`). A `.js` import that exists as `.ts`/`.tsx` (common in TypeScript ESM projects) is accepted. Imports of other file types (`./styles.css`, `./logo.svg`) must match an existing file exactly. Query and hash suffixes such as `?raw` are ignored. Package imports (`react`, `node:fs`, `@scope/pkg`) are never reported.
 
 ### Environment configuration
 
@@ -151,6 +151,33 @@ Detected forms: `process.env.NAME`, `process.env['NAME']`, `process?.env?.NAME`,
 | SCAN002 | info | A file was skipped because it is larger than 1 MB or appears to be binary |
 | SCAN003 | warning | A check failed to run; it is reported as skipped |
 
+## Ignoring paths
+
+To leave out paths that are broken on purpose (test fixtures, demo projects, generated code), add a `.shipshapeignore` file to the root of the scanned project:
+
+```text
+# Intentionally broken projects used by the tests
+test/fixtures/
+
+# Generated code
+**/*.generated.js
+/legacy/*.js
+```
+
+Nothing is ignored unless you list it. Matching uses a small subset of `.gitignore` syntax, applied to paths relative to the project root:
+
+| Pattern | Matches |
+| --- | --- |
+| `name` (no slash) | A file or directory called `name` at any depth |
+| `dir/sub` or `/name` | A path relative to the project root only |
+| `name/` (trailing slash) | Directories only |
+| `*` / `?` | Any characters / one character within a single path segment |
+| `**` | Any number of directories (`**/x`, `a/**`, `a/**/b`) |
+
+Blank lines and lines starting with `#` are skipped. An ignored directory is not entered at all. Negation (`!`), character classes (`[abc]`), backslash escapes, `..`, and patterns that would ignore the whole project are rejected: the scan stops with exit code 2 and names the line. The report always lists the patterns in use (`Ignoring (.shipshapeignore): ...` in text output, `ignorePatterns` in JSON) so an ignore is never silent.
+
+`.shipshapeignore` only affects which source files are analyzed for imports and environment variables. `package.json`, README, `.gitignore` and `.env.example` at the project root are always checked.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -168,6 +195,7 @@ Detected forms: `process.env.NAME`, `process.env['NAME']`, `process?.env?.NAME`,
   "tool": "shipshape",
   "version": "0.1.0",
   "target": ".",
+  "ignorePatterns": [],
   "filesScanned": 3,
   "summary": { "errors": 4, "warnings": 4, "info": 2 },
   "exitCode": 1,
@@ -207,7 +235,7 @@ These guarantees are enforced by the code and covered by tests:
 - **No `.env` reading.** Only `.env.example` is read, and only variable names are kept; values are never stored or printed. Actual `.env` files are never opened.
 - **No source output.** Findings contain rule IDs, messages, relative paths and positions, never source code.
 - **No network and no telemetry.** shipshape-cli makes no network requests.
-- **Bounded scope.** The target is resolved to an absolute path. Symbolic links are never followed. `node_modules`, `.git`, `dist`, `build`, `coverage`, `out`, `.next`, `.nuxt`, `.svelte-kit`, `.turbo`, `.cache` and `.output` are skipped. Files over 1 MB and binary files are skipped. Imports that resolve outside the target directory are not checked. Scanning the filesystem root or your home directory is refused, and a scan stops with exit code 2 if it finds more than 20,000 source files.
+- **Bounded scope.** The target is resolved to an absolute path. Symbolic links are never followed. `node_modules`, `.git`, `dist`, `build`, `coverage`, `out`, `.next`, `.nuxt`, `.svelte-kit`, `.turbo`, `.cache` and `.output` are skipped. Paths listed in `.shipshapeignore` are skipped. Files over 1 MB and binary files are skipped. Imports that resolve outside the target directory are not checked. Scanning the filesystem root or your home directory is refused, and a scan stops with exit code 2 if it finds more than 20,000 source files.
 
 ## Known limitations
 
@@ -216,7 +244,7 @@ These guarantees are enforced by the code and covered by tests:
 - **Only static specifiers** are checked; `import(variable)` and `require(variable)` are ignored.
 - **Other file types** (`.vue`, `.svelte`, `.astro`, `.mdx`) are not parsed, although imports *of* such files from JS/TS are checked.
 - **Environment variables** are detected only through `process.env` and `import.meta.env`. Framework-specific loaders (for example Next.js `next.config.js` `env`, Prisma `env("...")` in `schema.prisma`, Docker or CI configuration) are not understood, which is why unused `.env.example` entries are reported only as info. Only `.env.example` is used; `.env.sample` or `.env.template` are not recognised.
-- **Monorepos:** each package is scanned as its own project; run shipshape-cli per package.
+- **Monorepos and nested projects:** each package is scanned as its own project; run shipshape-cli per package. When scanning a parent folder, nested example or fixture projects are included unless you list them in `.shipshapeignore`.
 - **`.gitignore` matching** is simplified to top-level names and simple wildcards; negation rules make the generated-directory check stay silent.
 - shipshape-cli does not inspect git history or the git index, so it reports generated directories that are *not ignored*, not ones that are already committed.
 

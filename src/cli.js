@@ -32,6 +32,8 @@ Scan scope:
   modifies files.
   Skipped directories: ${[...EXCLUDED_DIRS].join(', ')}.
   Files larger than ${MAX_FILE_BYTES / 1024} KB are skipped.
+  Paths listed in a .shipshapeignore file at the target root are skipped;
+  the report lists the patterns in use.
 
 Exit codes:
   0  No errors found
@@ -109,6 +111,7 @@ export function main(argv, { stdout = process.stdout, stderr = process.stderr, e
   const report = {
     version: VERSION,
     target,
+    ignorePatterns: result.ignorePatterns,
     filesScanned: result.filesScanned,
     checks: result.checks,
     findings: result.findings,

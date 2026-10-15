@@ -34,6 +34,10 @@ test('parses TypeScript and TSX imports, including type-only and import = requir
   assert.deepEqual(importsOf('import X from "./x"; const el = <X<string> />;', '.tsx'), ['./x']);
 });
 
+test('parses import attributes', () => {
+  assert.deepEqual(importsOf('import data from "./data.json" with { type: "json" };'), ['./data.json']);
+});
+
 test('reports line and column of the specifier', () => {
   const [first] = collectImports(parseSource('\n\nimport a from "./a";', '.js'));
   assert.deepEqual(first, { specifier: './a', line: 3, column: 15 });
@@ -46,10 +50,10 @@ test('only relative specifiers are checked', () => {
 
 test('resolves extensionless, index, TS .js-to-.ts, query suffix and JSON imports', () => {
   const from = path.join(fixture('valid-project'), 'src', 'main.jsx');
-  for (const spec of ['./App', './App.jsx', './components/Button', './utils', './utils/math.js', './utils/helper', './data/config.json', './data/template.txt?raw']) {
+  for (const spec of ['./App', './App.jsx', './components/Button', './utils', './utils/math.js', './utils/helper', './data/config.json', './data/template.txt?raw', './styles.css', './types', './types.d.ts']) {
     assert.equal(resolvesRelative(from, spec), true, spec);
   }
-  for (const spec of ['./Missing', './components/Nope', './utils/math.mjs', './data']) {
+  for (const spec of ['./Missing', './components/Nope', './utils/math.mjs', './data', './missing.css', './types.js']) {
     assert.equal(resolvesRelative(from, spec), false, spec);
   }
 });

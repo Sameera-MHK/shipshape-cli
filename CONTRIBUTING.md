@@ -32,13 +32,17 @@ test/unit, test/integration, test/fixtures
 examples/                 Example projects used in the README
 ```
 
+## Self-scan
+
+The repository's own `.shipshapeignore` excludes `test/fixtures/` and `examples/`, which are broken on purpose or are separate projects. The tests scan those fixtures directly, so excluding them here does not reduce coverage. `node bin/shipshape.js check .` should report no errors; CI runs it.
+
 ## Adding or changing a rule
 
 1. Put the logic in the relevant module in `src/checks/`. Each check exports `{ id, title, section, passMessage, run(context) }` and returns `{ findings }` or `{ skipped: reason, findings: [] }`.
 2. Create findings with `finding()` from `src/findings.js`. Use a new, stable rule ID; never reuse or renumber existing IDs.
 3. Prefer silence over false positives. If a result is not reliable, do not report it, or report it as `info`.
 4. Never print file contents or environment values in messages.
-5. Add a fixture under `test/fixtures/` and tests asserting the exact findings.
+5. Add a fixture under `test/fixtures/` and tests asserting the exact findings. Fixtures are excluded from the repository self-scan by `.shipshapeignore`, so tests must scan them directly.
 6. Document the rule in the README and add a CHANGELOG entry.
 
 ## Pull requests

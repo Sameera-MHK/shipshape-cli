@@ -51,6 +51,9 @@ export function formatText(report, { color = false, quiet = false } = {}) {
 
   out.push(c.bold(`shipshape-cli v${report.version}`));
   out.push(`Scanning: ${report.target}`);
+  if (report.ignorePatterns?.length) {
+    out.push(c.dim(`Ignoring (.shipshapeignore): ${report.ignorePatterns.join(', ')}`));
+  }
   out.push(c.dim(`Source files analyzed: ${report.filesScanned}`));
 
   for (const section of SECTION_ORDER) {
@@ -80,6 +83,7 @@ export function formatJson(report) {
     tool: 'shipshape',
     version: report.version,
     target: report.target,
+    ignorePatterns: report.ignorePatterns || [],
     filesScanned: report.filesScanned,
     summary: report.summary,
     exitCode: report.exitCode,

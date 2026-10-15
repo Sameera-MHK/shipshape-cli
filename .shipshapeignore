@@ -1,0 +1,6 @@
+# Test fixtures are intentionally broken projects. The tests scan them directly.
+test/fixtures/
+
+# Each example is a separate project with its own package.json and .env.example.
+# Scan them on their own: shipshape check examples/clean-node-app
+examples/
