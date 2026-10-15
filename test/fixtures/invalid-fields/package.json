@@ -1,0 +1,11 @@
+{
+  "name": "Invalid Name",
+  "version": "one",
+  "type": "esm",
+  "scripts": {
+    "build": "",
+    "start": 42,
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": ["react"]
+}

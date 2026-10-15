@@ -1,0 +1,47 @@
+{
+  "name": "shipshape-cli",
+  "version": "0.1.0",
+  "description": "Know what's broken before you ship. A lightweight preflight CLI for JavaScript and React projects.",
+  "type": "module",
+  "bin": {
+    "shipshape": "bin/shipshape.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node bin/shipshape.js",
+    "test": "node --test test/unit/*.test.js test/integration/*.test.js",
+    "pack:check": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "cli",
+    "preflight",
+    "lint",
+    "imports",
+    "env",
+    "react",
+    "javascript",
+    "ci"
+  ],
+  "author": "sameera_mhk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sameera-MHK/shipshape-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sameera-MHK/shipshape-cli/issues"
+  },
+  "homepage": "https://github.com/Sameera-MHK/shipshape-cli#readme",
+  "dependencies": {
+    "@babel/parser": "^7.29.9"
+  }
+}
