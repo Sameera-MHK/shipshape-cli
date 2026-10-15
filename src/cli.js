@@ -6,7 +6,7 @@ import { formatText, formatJson, shouldUseColor } from './reporter.js';
 
 export const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 
-export const HELP = `ShipShape v${VERSION}
+export const HELP = `shipshape-cli v${VERSION}
 Know what's broken before you ship.
 
 Usage:
@@ -26,9 +26,10 @@ Options:
   -v, --version    Show the installed version
 
 Scan scope:
-  ShipShape reads package.json, .gitignore, .env.example and JS/JSX/TS/TSX
-  source files inside the target directory. It never reads .env files, never
-  runs project scripts, never follows symbolic links and never modifies files.
+  shipshape-cli reads package.json, .gitignore, .env.example and
+  JS/JSX/TS/TSX source files inside the target directory. It never reads .env
+  files, never runs project scripts, never follows symbolic links and never
+  modifies files.
   Skipped directories: ${[...EXCLUDED_DIRS].join(', ')}.
   Files larger than ${MAX_FILE_BYTES / 1024} KB are skipped.
 
@@ -98,7 +99,7 @@ export function main(argv, { stdout = process.stdout, stderr = process.stderr, e
     if (err instanceof FatalError) {
       stderr.write(`Error: ${err.message}\n`);
     } else {
-      stderr.write(`Error: ShipShape failed unexpectedly: ${err.message}\n`);
+      stderr.write(`Error: shipshape-cli failed unexpectedly: ${err.message}\n`);
     }
     return 2;
   }

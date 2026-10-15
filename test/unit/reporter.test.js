@@ -20,7 +20,7 @@ report.findings = report.checks.flatMap((c) => c.findings);
 
 test('text output groups by section and shows skipped checks explicitly', () => {
   const text = formatText(report);
-  assert.match(text, /^ShipShape v0\.1\.0\nScanning: \.\/app\n/);
+  assert.match(text, /^shipshape-cli v0\.1\.0\nScanning: \.\/app\n/);
   assert.match(text, /PROJECT\n  ✓ package\.json is valid\n  ! HYG001 README\.md is missing\n/);
   assert.match(text, /✗ IMP001 Cannot resolve import "\.\/x" \(a\.js:1:8\)\n      Fix: Fix it\./);
   assert.match(text, /- Environment configuration skipped: nothing to check/);
@@ -31,7 +31,7 @@ test('text output groups by section and shows skipped checks explicitly', () => 
 
 test('quiet output prints only errors, warnings and the summary', () => {
   const text = formatText(report, { quiet: true });
-  assert.ok(!text.includes('ShipShape v'));
+  assert.ok(!text.includes('shipshape-cli v'));
   assert.ok(!text.includes('SCAN002'));
   assert.ok(text.includes('IMP001') && text.includes('HYG001'));
   assert.match(text, /Summary: 1 error, 1 warning, 1 info\n$/);

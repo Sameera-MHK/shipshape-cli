@@ -1,6 +1,6 @@
-# Contributing to ShipShape
+# Contributing to shipshape-cli
 
-Thanks for helping improve ShipShape.
+Thanks for helping improve shipshape-cli.
 
 ## Setup
 

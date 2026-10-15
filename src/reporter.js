@@ -49,7 +49,7 @@ export function formatText(report, { color = false, quiet = false } = {}) {
     return out.join('\n') + '\n';
   }
 
-  out.push(c.bold(`ShipShape v${report.version}`));
+  out.push(c.bold(`shipshape-cli v${report.version}`));
   out.push(`Scanning: ${report.target}`);
   out.push(c.dim(`Source files analyzed: ${report.filesScanned}`));
 

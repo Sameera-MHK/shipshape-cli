@@ -1,14 +1,14 @@
-# ShipShape
+# shipshape-cli
 
 **Know what's broken before you ship.**
 
-ShipShape is a lightweight command-line preflight check for JavaScript and React projects that finds broken package configuration, unresolved relative imports, undocumented environment variables, and missing project files before handoff, CI, or deployment.
+shipshape-cli is a lightweight command-line preflight check for JavaScript and React projects that finds broken package configuration, unresolved relative imports, undocumented environment variables, and missing project files before handoff, CI, or deployment.
 
 > **Status:** v0.1.0 is an initial release. Rules and output may change before 1.0.
 
 ## Why
 
-Small mistakes slip through until a build fails in CI or a teammate clones the repo: an import pointing at a file that was renamed, an environment variable nobody added to `.env.example`, an empty npm script, a missing `.gitignore`. ShipShape catches these in one fast, read-only pass, with no account, no network access, and no telemetry.
+Small mistakes slip through until a build fails in CI or a teammate clones the repo: an import pointing at a file that was renamed, an environment variable nobody added to `.env.example`, an empty npm script, a missing `.gitignore`. shipshape-cli catches these in one fast, read-only pass, with no account, no network access, and no telemetry.
 
 ## Install and quick start
 
@@ -55,10 +55,10 @@ shipshape --version
 
 ## Sample output
 
-Running ShipShape on [`examples/broken-react-app`](examples/broken-react-app):
+Running shipshape-cli on [`examples/broken-react-app`](examples/broken-react-app):
 
 ```text
-ShipShape v0.1.0
+shipshape-cli v0.1.0
 Scanning: examples/broken-react-app
 Source files analyzed: 3
 
@@ -202,11 +202,11 @@ Node.js 20, 22 and 24 are tested in CI. The `engines` field requires `>=20`.
 
 These guarantees are enforced by the code and covered by tests:
 
-- **Read-only.** ShipShape never writes, moves or deletes files in the scanned project.
+- **Read-only.** shipshape-cli never writes, moves or deletes files in the scanned project.
 - **No code execution.** It never runs npm scripts, installs dependencies, or imports project code. Files are parsed, not executed.
 - **No `.env` reading.** Only `.env.example` is read, and only variable names are kept; values are never stored or printed. Actual `.env` files are never opened.
 - **No source output.** Findings contain rule IDs, messages, relative paths and positions, never source code.
-- **No network and no telemetry.** ShipShape makes no network requests.
+- **No network and no telemetry.** shipshape-cli makes no network requests.
 - **Bounded scope.** The target is resolved to an absolute path. Symbolic links are never followed. `node_modules`, `.git`, `dist`, `build`, `coverage`, `out`, `.next`, `.nuxt`, `.svelte-kit`, `.turbo`, `.cache` and `.output` are skipped. Files over 1 MB and binary files are skipped. Imports that resolve outside the target directory are not checked. Scanning the filesystem root or your home directory is refused, and a scan stops with exit code 2 if it finds more than 20,000 source files.
 
 ## Known limitations
@@ -216,13 +216,13 @@ These guarantees are enforced by the code and covered by tests:
 - **Only static specifiers** are checked; `import(variable)` and `require(variable)` are ignored.
 - **Other file types** (`.vue`, `.svelte`, `.astro`, `.mdx`) are not parsed, although imports *of* such files from JS/TS are checked.
 - **Environment variables** are detected only through `process.env` and `import.meta.env`. Framework-specific loaders (for example Next.js `next.config.js` `env`, Prisma `env("...")` in `schema.prisma`, Docker or CI configuration) are not understood, which is why unused `.env.example` entries are reported only as info. Only `.env.example` is used; `.env.sample` or `.env.template` are not recognised.
-- **Monorepos:** each package is scanned as its own project; run ShipShape per package.
+- **Monorepos:** each package is scanned as its own project; run shipshape-cli per package.
 - **`.gitignore` matching** is simplified to top-level names and simple wildcards; negation rules make the generated-directory check stay silent.
-- ShipShape does not inspect git history or the git index, so it reports generated directories that are *not ignored*, not ones that are already committed.
+- shipshape-cli does not inspect git history or the git index, so it reports generated directories that are *not ignored*, not ones that are already committed.
 
 ## Dependencies
 
-ShipShape has one runtime dependency: [`@babel/parser`](https://www.npmjs.com/package/@babel/parser), used to parse JavaScript, JSX, TypeScript and TSX reliably. Argument parsing (`node:util` `parseArgs`), file access and tests (`node:test`) use Node.js built-ins.
+shipshape-cli has one runtime dependency: [`@babel/parser`](https://www.npmjs.com/package/@babel/parser), used to parse JavaScript, JSX, TypeScript and TSX reliably. Argument parsing (`node:util` `parseArgs`), file access and tests (`node:test`) use Node.js built-ins.
 
 ## Contributing
 

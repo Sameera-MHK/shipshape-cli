@@ -50,10 +50,10 @@ export function resolveTarget(input) {
   }
   const real = fs.realpathSync(root);
   if (real === path.parse(real).root) {
-    throw new FatalError('Refusing to scan the filesystem root. Point ShipShape at a project directory.');
+    throw new FatalError('Refusing to scan the filesystem root. Point shipshape-cli at a project directory.');
   }
   if (real === fs.realpathSync(os.homedir())) {
-    throw new FatalError('Refusing to scan your home directory. Point ShipShape at a project directory.');
+    throw new FatalError('Refusing to scan your home directory. Point shipshape-cli at a project directory.');
   }
   return real;
 }
@@ -94,7 +94,7 @@ function collectSourceFiles(root, scanFindings) {
         files.push(abs);
         if (files.length > MAX_FILES) {
           throw new FatalError(
-            `More than ${MAX_FILES} source files found. Is this the right directory? ShipShape stops to avoid scanning far more than a single project.`,
+            `More than ${MAX_FILES} source files found. Is this the right directory? shipshape-cli stops to avoid scanning far more than a single project.`,
           );
         }
       }

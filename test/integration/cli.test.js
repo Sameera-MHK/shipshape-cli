@@ -23,7 +23,7 @@ test('--version and --help', () => {
   assert.equal(help.code, 0);
   assert.match(help.stdout, /Usage:\n  shipshape check \[path\] \[options\]/);
   assert.match(help.stdout, /--strict/);
-  assert.match(help.stdout, /never reads \.env files/);
+  assert.match(help.stdout, /never reads \.env\s+files/);
 });
 
 test('clean project exits 0 with every check passed', () => {
@@ -80,7 +80,7 @@ test('--quiet prints only essential output with the same exit code', () => {
   assert.deepEqual(clean, { code: 0, stdout: 'Summary: 0 errors, 0 warnings, 0 info\n', stderr: '' });
   const broken = run(['check', fixture('broken-imports'), '--quiet']);
   assert.equal(broken.code, 1);
-  assert.ok(!broken.stdout.includes('ShipShape v'));
+  assert.ok(!broken.stdout.includes('shipshape-cli v'));
   assert.equal(broken.stdout.match(/IMP001/g).length, 3);
 });
 
